@@ -1,0 +1,33 @@
+---
+- name: install dependencies
+  tags: logstash
+  apt:
+    name: gnupg
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: add elastic apt repo key
+  tags: logstash
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: add elastic apt repo
+  tags: logstash
+  apt_repository:
+    repo: "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+    state: present
+
+- name: install logstash
+  tags: logstash
+  apt:
+    name: logstash
+    state: present
+
+- name: start and enable logstash service
+  tags: logstash
+  systemd:
+    name: logstash
+    enabled: yes
+    state: started

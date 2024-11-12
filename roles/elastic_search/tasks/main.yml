@@ -1,0 +1,46 @@
+---
+- name: install java
+  yum:
+    name: java-11-openjdk
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: install EPEL repository
+  yum:
+    name: epel-release
+    state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: install elastic search yum repository
+  yum_repository:
+    name: elasticsearch
+    description: ElasticSearch repository
+    baseurl: https://artifacts.elastic.co/packages/7.x/yum
+    gpgcheck: yes
+    gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: install Elastic Search
+  yum:
+    name: elasticsearch
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: configure elastic search
+  template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+  when: ansible_distribution == "CentOS"
+
+- name: start elastic search
+  service:
+    name: elasticsearch
+    state: started
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: allow port 9200 through firewall
+  command: firewall-cmd --zone=public --add-port=9200/tcp --permanent
+  register: firewall_result
+  ignore_errors: true
